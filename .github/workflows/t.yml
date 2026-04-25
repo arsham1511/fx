@@ -1,21 +1,32 @@
-name: Global Connect
+name: Get My Shader or Die Trying 🎮
+
 on:
-  workflow_dispatch: # اجرای دستی
-  schedule:
-    - cron: '0 */6 * * *' # هر ۶ ساعت یکبار خودکار اجرا بشه که قطع نشه
+  workflow_dispatch: # این یعنی هر وقت خودت دکمه رو زدی اجرا بشه
 
 jobs:
-  tunnel:
+  download-and-commit:
     runs-on: ubuntu-latest
-    steps:
-      - name: Install Chisel
-        run: |
-          curl -L https://github.com/jpillora/chisel/releases/download/v1.9.1/chisel_1.9.1_linux_amd64.gz -o chisel.gz
-          gunzip chisel.gz
-          chmod +x chisel
+    permissions:
+      contents: write # برای اینکه اجازه داشته باشه فایل رو آپلود کنه
 
-      - name: Open Reverse Tunnel
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download SEUS Shader
         run: |
-          # این خط جادو می‌کنه: پورت ۱۰۸۰ سرور ایران رو وصل می‌کنه به اینترنت آزاد گیت‌هاب
-          ./chisel client ${{ secrets.REMOTE_SERVER }} R:1080:socks &
-          sleep 21600 # ۶ ساعت روشن نگهش دار
+          # با استفاده از curl فایل رو می‌کشیم بیرون
+          # از -L استفاده می‌کنیم چون ریدایرکت زیاده، -o هم برای اسم فایل
+          # یوزر ایجنت هم می‌زنیم که سایت فکر کنه ما یه مرورگرِ باکلاسیم، نه یه رباتِ گرسنه!
+          curl -H "User-Agent: Mozilla/5.0" -L "https://www.sonicether.com/download/seus-renewed-v1-0-1/?wpdmdl=2144" -o "SEUS-Renewed-v1.0.1.zip"
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "ShaderBot-2000"
+          git config --global user.email "actions@github.com"
+          git add SEUS-Renewed-v1.0.1.zip
+          
+          # چک می‌کنیم اگه فایل تغییر نکرده، الکی ارور نده
+          git diff --quiet && git diff --staged --quiet || git commit -m "Add/Update SEUS Shader 1.18 directly from source"
+          
+          git push
