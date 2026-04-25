@@ -1,32 +1,41 @@
 name: Get My Shader or Die Trying 🎮
 
 on:
-  workflow_dispatch: # این یعنی هر وقت خودت دکمه رو زدی اجرا بشه
+  workflow_dispatch:
 
 jobs:
   download-and-commit:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # برای اینکه اجازه داشته باشه فایل رو آپلود کنه
+      contents: write
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Download SEUS Shader
+      - name: Download SEUS Shader (Sneaky Mode 🐱‍👤)
         run: |
-          # با استفاده از curl فایل رو می‌کشیم بیرون
-          # از -L استفاده می‌کنیم چون ریدایرکت زیاده، -o هم برای اسم فایل
-          # یوزر ایجنت هم می‌زنیم که سایت فکر کنه ما یه مرورگرِ باکلاسیم، نه یه رباتِ گرسنه!
-          curl -H "User-Agent: Mozilla/5.0" -L "https://www.sonicether.com/download/seus-renewed-v1-0-1/?wpdmdl=2144" -o "SEUS-Renewed-v1.0.1.zip"
+          # اینجا بهش می‌گیم که ما از صفحه دانلود SEUS اومدیم (Referer)
+          # و خودمون رو جای یه مرورگر واقعی جا می‌زنیم
+          curl -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
+               -H "Referer: https://www.sonicether.com/download/seus-renewed-v1-0-1/" \
+               -L "https://www.sonicether.com/download/seus-renewed-v1-0-1/?wpdmdl=2144" \
+               -o "SEUS-Renewed-v1.0.1.zip"
+
+      - name: Check if it's a real ZIP or just HTML
+        run: |
+          # یه چک کوچولو که مطمئن بشیم دوباره بهمون HTML ننداخته باشن!
+          file_type=$(file --mime-type -b SEUS-Renewed-v1.0.1.zip)
+          echo "File type is: $file_type"
+          if [[ "$file_type" != "application/zip" ]]; then
+            echo "Error: Still getting HTML instead of ZIP! The guard is too smart."
+            exit 1
+          fi
 
       - name: Commit and Push
         run: |
           git config --global user.name "ShaderBot-2000"
           git config --global user.email "actions@github.com"
           git add SEUS-Renewed-v1.0.1.zip
-          
-          # چک می‌کنیم اگه فایل تغییر نکرده، الکی ارور نده
-          git diff --quiet && git diff --staged --quiet || git commit -m "Add/Update SEUS Shader 1.18 directly from source"
-          
+          git diff --quiet && git diff --staged --quiet || git commit -m "Add/Update SEUS Shader 1.18 (Success!)"
           git push
