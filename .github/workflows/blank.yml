@@ -1,6 +1,7 @@
 name: Hide Chisel in Plain Sight
 on: workflow_dispatch
-
+permissions:
+  contents: write
 jobs:
   encode:
     runs-on: ubuntu-latest
