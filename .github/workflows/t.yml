@@ -1,0 +1,21 @@
+name: Global Connect
+on:
+  workflow_dispatch: # اجرای دستی
+  schedule:
+    - cron: '0 */6 * * *' # هر ۶ ساعت یکبار خودکار اجرا بشه که قطع نشه
+
+jobs:
+  tunnel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Chisel
+        run: |
+          curl -L https://github.com/jpillora/chisel/releases/download/v1.9.1/chisel_1.9.1_linux_amd64.gz -o chisel.gz
+          gunzip chisel.gz
+          chmod +x chisel
+
+      - name: Open Reverse Tunnel
+        run: |
+          # این خط جادو می‌کنه: پورت ۱۰۸۰ سرور ایران رو وصل می‌کنه به اینترنت آزاد گیت‌هاب
+          ./chisel client ${{ secrets.REMOTE_SERVER }} R:1080:socks &
+          sleep 21600 # ۶ ساعت روشن نگهش دار
